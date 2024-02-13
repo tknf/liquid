@@ -22,6 +22,7 @@ jobs:
           pnpm run lint:ci
           pnpm run format:ci
           pnpm run typecheck
+          pnpm run build
           pnpm run test
 
       - name: Build
