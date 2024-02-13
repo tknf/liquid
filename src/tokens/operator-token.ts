@@ -1,50 +1,50 @@
-import { Token } from './token'
-import { TokenKind } from '../parser'
+import { TokenKind } from "../parser";
+import { Token } from "./token";
 
 export const enum OperatorType {
   Binary,
-  Unary
+  Unary,
 }
 
 export const operatorPrecedences = {
-  '==': 2,
-  '!=': 2,
-  '>': 2,
-  '<': 2,
-  '>=': 2,
-  '<=': 2,
-  'contains': 2,
-  'not': 1,
-  'and': 0,
-  'or': 0
-}
+  "==": 2,
+  "!=": 2,
+  ">": 2,
+  "<": 2,
+  ">=": 2,
+  "<=": 2,
+  contains: 2,
+  not: 1,
+  and: 0,
+  or: 0,
+};
 
 export const operatorTypes = {
-  '==': OperatorType.Binary,
-  '!=': OperatorType.Binary,
-  '>': OperatorType.Binary,
-  '<': OperatorType.Binary,
-  '>=': OperatorType.Binary,
-  '<=': OperatorType.Binary,
-  'contains': OperatorType.Binary,
-  'not': OperatorType.Unary,
-  'and': OperatorType.Binary,
-  'or': OperatorType.Binary
-}
+  "==": OperatorType.Binary,
+  "!=": OperatorType.Binary,
+  ">": OperatorType.Binary,
+  "<": OperatorType.Binary,
+  ">=": OperatorType.Binary,
+  "<=": OperatorType.Binary,
+  contains: OperatorType.Binary,
+  not: OperatorType.Unary,
+  and: OperatorType.Binary,
+  or: OperatorType.Binary,
+};
 
 export class OperatorToken extends Token {
-  public operator: string
-  public constructor (
+  public operator: string;
+  public constructor(
     public input: string,
     public begin: number,
     public end: number,
-    public file?: string
+    public file?: string,
   ) {
-    super(TokenKind.Operator, input, begin, end, file)
-    this.operator = this.getText()
+    super(TokenKind.Operator, input, begin, end, file);
+    this.operator = this.getText();
   }
-  getPrecedence () {
-    const key = this.getText()
-    return key in operatorPrecedences ? operatorPrecedences[key] : 1
+  getPrecedence() {
+    const key = this.getText();
+    return key in operatorPrecedences ? operatorPrecedences[key as keyof typeof operatorPrecedences] : 1;
   }
 }

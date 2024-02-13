@@ -1,10 +1,10 @@
-import { isArray } from '../util/underscore'
-import { ValueToken } from '../tokens/value-token'
+import { isArray } from "../util/underscore";
+import type { ValueToken } from "../tokens/value-token";
 
-type KeyValuePair = [string?, ValueToken?]
+type KeyValuePair = [string?, ValueToken?];
 
-export type FilterArg = ValueToken | KeyValuePair
+export type FilterArg = ValueToken | KeyValuePair;
 
-export function isKeyValuePair (arr: FilterArg): arr is KeyValuePair {
-  return isArray(arr)
+export function isKeyValuePair(arr: FilterArg): arr is KeyValuePair {
+  return isArray(arr);
 }

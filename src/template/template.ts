@@ -1,6 +1,6 @@
-import { Context } from '../context/context'
-import { Token } from '../tokens/token'
-import { Emitter } from '../emitters/emitter'
+import type { Context } from "../context/context";
+import type { Token } from "../tokens/token";
+import type { Emitter } from "../emitters/emitter";
 
 export interface Template {
   token: Token;

@@ -1,11 +1,11 @@
-import * as htmlFilters from './html'
-import * as mathFilters from './math'
-import * as urlFilters from './url'
-import * as arrayFilters from './array'
-import * as dateFilters from './date'
-import * as stringFilters from './string'
-import { Default, json, raw } from './misc'
-import { FilterImplOptions } from '../template'
+import type { FilterImplOptions } from "../template";
+import * as htmlFilters from "./html";
+import * as mathFilters from "./math";
+import * as urlFilters from "./url";
+import * as arrayFilters from "./array";
+import * as dateFilters from "./date";
+import * as stringFilters from "./string";
+import { Default, json, raw } from "./misc";
 
 export const filters: Record<string, FilterImplOptions> = {
   ...htmlFilters,
@@ -16,5 +16,5 @@ export const filters: Record<string, FilterImplOptions> = {
   ...stringFilters,
   json,
   raw,
-  default: Default
-}
+  default: Default,
+};

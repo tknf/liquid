@@ -1,5 +1,5 @@
-import type { Context } from '../context'
-import type { Liquid } from '../liquid'
+import type { Context } from "../context";
+import type { Liquid } from "../liquid";
 
 export interface FilterImpl {
   context: Context;
@@ -13,4 +13,4 @@ export interface FilterOptions {
   raw: boolean;
 }
 
-export type FilterImplOptions = FilterHandler | FilterOptions
+export type FilterImplOptions = FilterHandler | FilterOptions;

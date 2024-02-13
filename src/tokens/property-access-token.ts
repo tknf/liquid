@@ -1,21 +1,21 @@
-import { Token } from './token'
-import { LiteralToken } from './literal-token'
-import { ValueToken } from './value-token'
-import { IdentifierToken } from './identifier-token'
-import { NumberToken } from './number-token'
-import { RangeToken } from './range-token'
-import { QuotedToken } from './quoted-token'
-import { TokenKind } from '../parser'
+import { TokenKind } from "../parser";
+import { Token } from "./token";
+import type { LiteralToken } from "./literal-token";
+import type { ValueToken } from "./value-token";
+import type { IdentifierToken } from "./identifier-token";
+import type { NumberToken } from "./number-token";
+import type { RangeToken } from "./range-token";
+import type { QuotedToken } from "./quoted-token";
 
 export class PropertyAccessToken extends Token {
-  constructor (
+  constructor(
     public variable: QuotedToken | RangeToken | LiteralToken | NumberToken | undefined,
     public props: (ValueToken | IdentifierToken)[],
     input: string,
     begin: number,
     end: number,
-    file?: string
+    file?: string,
   ) {
-    super(TokenKind.PropertyAccess, input, begin, end, file)
+    super(TokenKind.PropertyAccess, input, begin, end, file);
   }
 }

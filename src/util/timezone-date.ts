@@ -1,8 +1,8 @@
-import { LiquidDate } from './liquid-date'
+import type { LiquidDate } from "./liquid-date";
 
 // one minute in milliseconds
-const OneMinute = 60000
-const ISO8601_TIMEZONE_PATTERN = /([zZ]|([+-])(\d{2}):(\d{2}))$/
+const OneMinute = 60000;
+const ISO8601_TIMEZONE_PATTERN = /([zZ]|([+-])(\d{2}):(\d{2}))$/;
 
 /**
  * A date implementation with timezone info, just like Ruby date
@@ -12,62 +12,60 @@ const ISO8601_TIMEZONE_PATTERN = /([zZ]|([+-])(\d{2}):(\d{2}))$/
  * - rewrite getTimezoneOffset() to trick strftime
  */
 export class TimezoneDate implements LiquidDate {
-  private timezoneOffset: number
-  private date: Date
-  private displayDate: Date
-  constructor (init: string | number | Date | TimezoneDate, timezoneOffset: number) {
-    this.date = init instanceof TimezoneDate
-      ? init.date
-      : new Date(init)
-    this.timezoneOffset = timezoneOffset
+  private timezoneOffset: number;
+  private date: Date;
+  private displayDate: Date;
+  constructor(init: string | number | Date | TimezoneDate, timezoneOffset: number) {
+    this.date = init instanceof TimezoneDate ? init.date : new Date(init);
+    this.timezoneOffset = timezoneOffset;
 
-    const diff = (this.date.getTimezoneOffset() - this.timezoneOffset) * OneMinute
-    const time = this.date.getTime() + diff
-    this.displayDate = new Date(time)
+    const diff = (this.date.getTimezoneOffset() - this.timezoneOffset) * OneMinute;
+    const time = this.date.getTime() + diff;
+    this.displayDate = new Date(time);
   }
 
-  getTime () {
-    return this.displayDate.getTime()
+  getTime() {
+    return this.displayDate.getTime();
   }
 
-  getMilliseconds () {
-    return this.displayDate.getMilliseconds()
+  getMilliseconds() {
+    return this.displayDate.getMilliseconds();
   }
-  getSeconds () {
-    return this.displayDate.getSeconds()
+  getSeconds() {
+    return this.displayDate.getSeconds();
   }
-  getMinutes () {
-    return this.displayDate.getMinutes()
+  getMinutes() {
+    return this.displayDate.getMinutes();
   }
-  getHours () {
-    return this.displayDate.getHours()
+  getHours() {
+    return this.displayDate.getHours();
   }
-  getDay () {
-    return this.displayDate.getDay()
+  getDay() {
+    return this.displayDate.getDay();
   }
-  getDate () {
-    return this.displayDate.getDate()
+  getDate() {
+    return this.displayDate.getDate();
   }
-  getMonth () {
-    return this.displayDate.getMonth()
+  getMonth() {
+    return this.displayDate.getMonth();
   }
-  getFullYear () {
-    return this.displayDate.getFullYear()
+  getFullYear() {
+    return this.displayDate.getFullYear();
   }
-  toLocaleString (locale?: string, init?: any) {
+  toLocaleString(locale?: string, init?: any) {
     if (init?.timeZone) {
-      return this.date.toLocaleString(locale, init)
+      return this.date.toLocaleString(locale, init);
     }
-    return this.displayDate.toLocaleString(locale, init)
+    return this.displayDate.toLocaleString(locale, init);
   }
-  toLocaleTimeString (locale?: string) {
-    return this.displayDate.toLocaleTimeString(locale)
+  toLocaleTimeString(locale?: string) {
+    return this.displayDate.toLocaleTimeString(locale);
   }
-  toLocaleDateString (locale?: string) {
-    return this.displayDate.toLocaleDateString(locale)
+  toLocaleDateString(locale?: string) {
+    return this.displayDate.toLocaleDateString(locale);
   }
-  getTimezoneOffset () {
-    return this.timezoneOffset!
+  getTimezoneOffset() {
+    return this.timezoneOffset!;
   }
 
   /**
@@ -83,18 +81,18 @@ export class TimezoneDate implements LiquidDate {
    * we create a different Date to trick strftime, it's both simpler and more performant.
    * Given that a template is expected to be parsed fewer times than rendered.
    */
-  static createDateFixedToTimezone (dateString: string): LiquidDate {
-    const m = dateString.match(ISO8601_TIMEZONE_PATTERN)
+  static createDateFixedToTimezone(dateString: string): LiquidDate {
+    const m = dateString.match(ISO8601_TIMEZONE_PATTERN);
     // representing a UTC timestamp
-    if (m && m[1] === 'Z') {
-      return new TimezoneDate(+new Date(dateString), 0)
+    if (m && m[1] === "Z") {
+      return new TimezoneDate(+new Date(dateString), 0);
     }
     // has a timezone specified
     if (m && m[2] && m[3] && m[4]) {
-      const [, , sign, hours, minutes] = m
-      const offset = (sign === '+' ? -1 : 1) * (parseInt(hours, 10) * 60 + parseInt(minutes, 10))
-      return new TimezoneDate(+new Date(dateString), offset)
+      const [, , sign, hours, minutes] = m;
+      const offset = (sign === "+" ? -1 : 1) * (parseInt(hours, 10) * 60 + parseInt(minutes, 10));
+      return new TimezoneDate(+new Date(dateString), offset);
     }
-    return new Date(dateString)
+    return new Date(dateString);
   }
 }

@@ -1,15 +1,15 @@
-import { Token } from './token'
-import { TokenKind } from '../parser'
+import { TokenKind } from "../parser";
+import { Token } from "./token";
 
 export class NumberToken extends Token {
-  public content: number
-  constructor (
+  public content: number;
+  constructor(
     public input: string,
     public begin: number,
     public end: number,
-    public file?: string
+    public file?: string,
   ) {
-    super(TokenKind.Number, input, begin, end, file)
-    this.content = Number(this.getText())
+    super(TokenKind.Number, input, begin, end, file);
+    this.content = Number(this.getText());
   }
 }

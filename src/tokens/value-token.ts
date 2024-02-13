@@ -1,7 +1,7 @@
-import { RangeToken } from './range-token'
-import { LiteralToken } from './literal-token'
-import { NumberToken } from './number-token'
-import { QuotedToken } from './quoted-token'
-import { PropertyAccessToken } from './property-access-token'
+import type { RangeToken } from "./range-token";
+import type { LiteralToken } from "./literal-token";
+import type { NumberToken } from "./number-token";
+import type { QuotedToken } from "./quoted-token";
+import type { PropertyAccessToken } from "./property-access-token";
 
-export type ValueToken = RangeToken | LiteralToken | QuotedToken | PropertyAccessToken | NumberToken
+export type ValueToken = RangeToken | LiteralToken | QuotedToken | PropertyAccessToken | NumberToken;

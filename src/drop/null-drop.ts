@@ -1,24 +1,24 @@
-import { Drop } from './drop'
-import { Comparable } from './comparable'
-import { isNil, toValue } from '../util'
+import { isNil, toValue } from "../util/underscore";
+import { Drop } from "./drop";
+import type { Comparable } from "./comparable";
 
 export class NullDrop extends Drop implements Comparable {
-  public equals (value: any) {
-    return isNil(toValue(value))
+  public equals(value: any) {
+    return isNil(toValue(value));
   }
-  public gt () {
-    return false
+  public gt() {
+    return false;
   }
-  public geq () {
-    return false
+  public geq() {
+    return false;
   }
-  public lt () {
-    return false
+  public lt() {
+    return false;
   }
-  public leq () {
-    return false
+  public leq() {
+    return false;
   }
-  public valueOf () {
-    return null
+  public valueOf() {
+    return null;
   }
 }

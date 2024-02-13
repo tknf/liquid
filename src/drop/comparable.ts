@@ -1,4 +1,4 @@
-import { isFunction } from '../util'
+import { isFunction } from "../util/underscore";
 
 export interface Comparable {
   equals: (rhs: any) => boolean;
@@ -8,6 +8,6 @@ export interface Comparable {
   leq: (rhs: any) => boolean;
 }
 
-export function isComparable (arg: any): arg is Comparable {
-  return arg && isFunction(arg.equals)
+export function isComparable(arg: any): arg is Comparable {
+  return arg && isFunction(arg.equals);
 }

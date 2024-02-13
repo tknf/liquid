@@ -1,77 +1,93 @@
-import { __assign } from 'tslib'
-import { ForloopDrop } from '../drop'
-import { toEnumerable } from '../util'
-import { TopLevelToken, assert, Liquid, Token, Template, evalQuotedToken, TypeGuards, Tokenizer, evalToken, Hash, Emitter, TagToken, Context, Tag } from '..'
+import { __assign } from "tslib";
+import { ForloopDrop } from "../drop";
+import type { TopLevelToken, Liquid, Token, Template, Tokenizer, Emitter, TagToken } from "..";
+import { assert, evalQuotedToken, TypeGuards, evalToken, Hash, Context, Tag } from "..";
+import { toEnumerable } from "../util/collection";
 
-export type ParsedFileName = Template[] | Token | string | undefined
+export type ParsedFileName = Template[] | Token | string | undefined;
 
 export default class extends Tag {
-  private file: ParsedFileName
-  private currentFile?: string
-  private hash: Hash
-  constructor (token: TagToken, remainTokens: TopLevelToken[], liquid: Liquid) {
-    super(token, remainTokens, liquid)
-    const tokenizer = this.tokenizer
-    this.file = parseFilePath(tokenizer, this.liquid)
-    this.currentFile = token.file
+  private file: ParsedFileName;
+  private currentFile?: string;
+  private hash: Hash;
+  constructor(token: TagToken, remainTokens: TopLevelToken[], liquid: Liquid) {
+    super(token, remainTokens, liquid);
+    const tokenizer = this.tokenizer;
+    this.file = parseFilePath(tokenizer, this.liquid);
+    this.currentFile = token.file;
     while (!tokenizer.end()) {
-      tokenizer.skipBlank()
-      const begin = tokenizer.p
-      const keyword = tokenizer.readIdentifier()
-      if (keyword.content === 'with' || keyword.content === 'for') {
-        tokenizer.skipBlank()
+      tokenizer.skipBlank();
+      const begin = tokenizer.p;
+      const keyword = tokenizer.readIdentifier();
+      if (keyword.content === "with" || keyword.content === "for") {
+        tokenizer.skipBlank();
         // can be normal key/value pair, like "with: true"
-        if (tokenizer.peek() !== ':') {
-          const value = tokenizer.readValue()
+        if (tokenizer.peek() !== ":") {
+          const value = tokenizer.readValue();
           // can be normal key, like "with,"
           if (value) {
-            const beforeAs = tokenizer.p
-            const asStr = tokenizer.readIdentifier()
-            let alias
-            if (asStr.content === 'as') alias = tokenizer.readIdentifier()
-            else tokenizer.p = beforeAs
+            const beforeAs = tokenizer.p;
+            const asStr = tokenizer.readIdentifier();
+            let alias;
+            if (asStr.content === "as") alias = tokenizer.readIdentifier();
+            else tokenizer.p = beforeAs;
 
-            this[keyword.content] = { value, alias: alias && alias.content }
-            tokenizer.skipBlank()
-            if (tokenizer.peek() === ',') tokenizer.advance()
-            continue // matched!
+            // @ts-ignore
+            this[keyword.content] = { value, alias: alias && alias.content };
+            tokenizer.skipBlank();
+            if (tokenizer.peek() === ",") tokenizer.advance();
+            continue; // matched!
           }
         }
       }
       /**
        * restore cursor if with/for not matched
        */
-      tokenizer.p = begin
-      break
+      tokenizer.p = begin;
+      break;
     }
-    this.hash = new Hash(tokenizer.remaining())
+    this.hash = new Hash(tokenizer.remaining());
   }
-  * render (ctx: Context, emitter: Emitter): Generator<unknown, void, unknown> {
-    const { liquid, hash } = this
-    const filepath = (yield renderFilePath(this['file'], ctx, liquid)) as string
-    assert(filepath, () => `illegal file path "${filepath}"`)
+  *render(ctx: Context, emitter: Emitter): Generator<unknown, void, unknown> {
+    const { liquid, hash } = this;
+    const filepath = (yield renderFilePath(this["file"], ctx, liquid)) as string;
+    assert(filepath, () => `illegal file path "${filepath}"`);
 
-    const childCtx = new Context({}, ctx.opts, { sync: ctx.sync, globals: ctx.globals, strictVariables: ctx.strictVariables })
-    const scope = childCtx.bottom()
-    __assign(scope, yield hash.render(ctx))
-    if (this['with']) {
-      const { value, alias } = this['with']
-      scope[alias || filepath] = yield evalToken(value, ctx)
+    const childCtx = new Context({}, ctx.opts, {
+      sync: ctx.sync,
+      globals: ctx.globals,
+      strictVariables: ctx.strictVariables,
+    });
+    const scope = childCtx.bottom();
+    __assign(scope, yield hash.render(ctx));
+    if (this["with" as keyof typeof this]) {
+      const {
+        // @ts-ignore
+        value,
+        // @ts-ignore
+        alias,
+      } = this["with" as keyof typeof this];
+      scope[(alias || filepath) as keyof typeof scope] = yield evalToken(value, ctx);
     }
 
-    if (this['for']) {
-      const { value, alias } = this['for']
-      const collection = toEnumerable(yield evalToken(value, ctx))
-      scope['forloop'] = new ForloopDrop(collection.length, value.getText(), alias)
+    if (this["for" as keyof typeof this]) {
+      const {
+        // @ts-ignore
+        value,
+        // @ts-ignore
+        alias,
+      } = this["for" as keyof typeof this];
+      const collection = toEnumerable(yield evalToken(value, ctx));
+      scope["forloop" as keyof typeof scope] = new ForloopDrop(collection.length, value.getText(), alias);
       for (const item of collection) {
-        scope[alias] = item
-        const templates = (yield liquid._parsePartialFile(filepath, childCtx.sync, this['currentFile'])) as Template[]
-        yield liquid.renderer.renderTemplates(templates, childCtx, emitter)
-        scope['forloop'].next()
+        scope[alias as keyof typeof scope] = item;
+        const templates = (yield liquid._parsePartialFile(filepath, childCtx.sync, this["currentFile"])) as Template[];
+        yield liquid.renderer.renderTemplates(templates, childCtx, emitter);
+        scope["forloop" as keyof typeof scope].next();
       }
     } else {
-      const templates = (yield liquid._parsePartialFile(filepath, childCtx.sync, this['currentFile'])) as Template[]
-      yield liquid.renderer.renderTemplates(templates, childCtx, emitter)
+      const templates = (yield liquid._parsePartialFile(filepath, childCtx.sync, this["currentFile"])) as Template[];
+      yield liquid.renderer.renderTemplates(templates, childCtx, emitter);
     }
   }
 }
@@ -82,31 +98,31 @@ export default class extends Tag {
  * @return Token for expression (not quoted)
  * @throws TypeError if cannot read next token
  */
-export function parseFilePath (tokenizer: Tokenizer, liquid: Liquid): ParsedFileName {
+export function parseFilePath(tokenizer: Tokenizer, liquid: Liquid): ParsedFileName {
   if (liquid.options.dynamicPartials) {
-    const file = tokenizer.readValue()
-    tokenizer.assert(file, 'illegal file path')
-    if (file!.getText() === 'none') return
+    const file = tokenizer.readValue();
+    tokenizer.assert(file, "illegal file path");
+    if (file!.getText() === "none") return;
     if (TypeGuards.isQuotedToken(file)) {
       // for filenames like "files/{{file}}", eval as liquid template
-      const templates = liquid.parse(evalQuotedToken(file))
-      return optimize(templates)
+      const templates = liquid.parse(evalQuotedToken(file));
+      return optimize(templates);
     }
-    return file
+    return file;
   }
-  const tokens = [...tokenizer.readFileNameTemplate(liquid.options)]
-  const templates = optimize(liquid.parser.parseTokens(tokens))
-  return templates === 'none' ? undefined : templates
+  const tokens = [...tokenizer.readFileNameTemplate(liquid.options)];
+  const templates = optimize(liquid.parser.parseTokens(tokens));
+  return templates === "none" ? undefined : templates;
 }
 
-function optimize (templates: Template[]): string | Template[] {
+function optimize(templates: Template[]): string | Template[] {
   // for filenames like "files/file.liquid", extract the string directly
-  if (templates.length === 1 && TypeGuards.isHTMLToken(templates[0].token)) return templates[0].token.getContent()
-  return templates
+  if (templates.length === 1 && TypeGuards.isHTMLToken(templates[0].token)) return templates[0].token.getContent();
+  return templates;
 }
 
-export function * renderFilePath (file: ParsedFileName, ctx: Context, liquid: Liquid): IterableIterator<unknown> {
-  if (typeof file === 'string') return file
-  if (Array.isArray(file)) return liquid.renderer.renderTemplates(file, ctx)
-  return yield evalToken(file, ctx)
+export function* renderFilePath(file: ParsedFileName, ctx: Context, liquid: Liquid): IterableIterator<unknown> {
+  if (typeof file === "string") return file;
+  if (Array.isArray(file)) return liquid.renderer.renderTemplates(file, ctx);
+  return yield evalToken(file, ctx);
 }

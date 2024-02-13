@@ -1,85 +1,92 @@
-import { QuotedToken, RangeToken, OperatorToken, Token, PropertyAccessToken, OperatorType, operatorTypes } from '../tokens'
-import { isRangeToken, isPropertyAccessToken, UndefinedVariableError, range, isOperatorToken, assert } from '../util'
-import type { Context } from '../context'
-import type { UnaryOperatorHandler } from '../render'
+import type { QuotedToken, RangeToken, OperatorToken, Token, PropertyAccessToken } from "../tokens";
+import { OperatorType, operatorTypes } from "../tokens";
+import type { Context } from "../context";
+import type { UnaryOperatorHandler } from "../render";
+import { isOperatorToken, isPropertyAccessToken, isRangeToken } from "../util/type-guards";
+import { UndefinedVariableError } from "../util/error";
+import { range } from "../util/underscore";
 
 export class Expression {
-  private postfix: Token[]
+  private postfix: Token[];
 
-  public constructor (tokens: IterableIterator<Token>) {
-    this.postfix = [...toPostfix(tokens)]
+  public constructor(tokens: IterableIterator<Token>) {
+    this.postfix = [...toPostfix(tokens)];
   }
-  public * evaluate (ctx: Context, lenient?: boolean): Generator<unknown, unknown, unknown> {
-    assert(ctx, 'unable to evaluate: context not defined')
-    const operands: any[] = []
+  public *evaluate(ctx: Context, lenient?: boolean): Generator<unknown, unknown, unknown> {
+    assert(ctx, "unable to evaluate: context not defined");
+    const operands: any[] = [];
     for (const token of this.postfix) {
       if (isOperatorToken(token)) {
-        const r = operands.pop()
-        let result
-        if (operatorTypes[token.operator] === OperatorType.Unary) {
-          result = yield (ctx.opts.operators[token.operator] as UnaryOperatorHandler)(r, ctx)
+        const r = operands.pop();
+        let result;
+        if (operatorTypes[token.operator as keyof typeof operatorTypes] === OperatorType.Unary) {
+          result = yield (ctx.opts.operators[token.operator] as UnaryOperatorHandler)(r, ctx);
         } else {
-          const l = operands.pop()
-          result = yield ctx.opts.operators[token.operator](l, r, ctx)
+          const l = operands.pop();
+          result = yield ctx.opts.operators[token.operator](l, r, ctx);
         }
-        operands.push(result)
+        operands.push(result);
       } else {
-        operands.push(yield evalToken(token, ctx, lenient && this.postfix.length === 1))
+        operands.push(yield evalToken(token, ctx, lenient && this.postfix.length === 1));
       }
     }
-    return operands[0]
+    return operands[0];
   }
-  public valid () {
-    return !!this.postfix.length
+  public valid() {
+    return !!this.postfix.length;
   }
 }
 
-export function * evalToken (token: Token | undefined, ctx: Context, lenient = false): IterableIterator<unknown> {
-  if (!token) return
-  if ('content' in token) return token.content
-  if (isPropertyAccessToken(token)) return yield evalPropertyAccessToken(token, ctx, lenient)
-  if (isRangeToken(token)) return yield evalRangeToken(token, ctx)
+export function* evalToken(token: Token | undefined, ctx: Context, lenient = false): IterableIterator<unknown> {
+  if (!token) return;
+  if ("content" in token) return token.content;
+  if (isPropertyAccessToken(token)) return yield evalPropertyAccessToken(token, ctx, lenient);
+  if (isRangeToken(token)) return yield evalRangeToken(token, ctx);
 }
 
-function * evalPropertyAccessToken (token: PropertyAccessToken, ctx: Context, lenient: boolean): IterableIterator<unknown> {
-  const props: string[] = []
-  const variable = yield evalToken(token.variable, ctx, lenient)
+function* evalPropertyAccessToken(
+  token: PropertyAccessToken,
+  ctx: Context,
+  lenient: boolean,
+): IterableIterator<unknown> {
+  const props: string[] = [];
+  const variable = yield evalToken(token.variable, ctx, lenient);
   for (const prop of token.props) {
-    props.push((yield evalToken(prop, ctx, false)) as unknown as string)
+    props.push((yield evalToken(prop, ctx, false)) as unknown as string);
   }
   try {
     if (token.variable) {
-      return yield ctx._getFromScope(variable, props)
+      return yield ctx._getFromScope(variable, props);
     } else {
-      return yield ctx._get(props)
+      return yield ctx._get(props);
     }
   } catch (e) {
-    if (lenient && (e as Error).name === 'InternalUndefinedVariableError') return null
-    throw (new UndefinedVariableError(e as Error, token))
+    if (lenient && (e as Error).name === "InternalUndefinedVariableError") return null;
+    throw new UndefinedVariableError(e as Error, token);
   }
 }
 
-export function evalQuotedToken (token: QuotedToken) {
-  return token.content
+export function evalQuotedToken(token: QuotedToken) {
+  return token.content;
 }
 
-function * evalRangeToken (token: RangeToken, ctx: Context) {
-  const low: number = yield evalToken(token.lhs, ctx)
-  const high: number = yield evalToken(token.rhs, ctx)
-  return range(+low, +high + 1)
+function* evalRangeToken(token: RangeToken, ctx: Context) {
+  const low: number = yield evalToken(token.lhs, ctx);
+  const high: number = yield evalToken(token.rhs, ctx);
+  return range(+low, +high + 1);
 }
 
-function * toPostfix (tokens: IterableIterator<Token>): IterableIterator<Token> {
-  const ops: OperatorToken[] = []
+function* toPostfix(tokens: IterableIterator<Token>): IterableIterator<Token> {
+  const ops: OperatorToken[] = [];
   for (const token of tokens) {
     if (isOperatorToken(token)) {
       while (ops.length && ops[ops.length - 1].getPrecedence() > token.getPrecedence()) {
-        yield ops.pop()!
+        yield ops.pop()!;
       }
-      ops.push(token)
-    } else yield token
+      ops.push(token);
+    } else yield token;
   }
   while (ops.length) {
-    yield ops.pop()!
+    yield ops.pop()!;
   }
 }

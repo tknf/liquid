@@ -1,6 +1,6 @@
-import { Liquid } from '../../../src/liquid'
+import { Liquid } from "../../../src/liquid";
 
-const liquid = new Liquid()
+const liquid = new Liquid();
 
 const cases = [
   {
@@ -17,8 +17,9 @@ const cases = [
           John
         </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -34,8 +35,9 @@ const cases = [
       <div>
         <p>John</p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -53,8 +55,9 @@ const cases = [
       <div>
         <p>yes</p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -72,8 +75,9 @@ const cases = [
           
         </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -89,41 +93,53 @@ const cases = [
           
         </p>
       </div>
-    `
-  }, {
-    text: '<p>{{- \'John\' -}}</p>',
-    expected: '<p>John</p>'
-  }, {
-    text: '<p>{%- if true -%}yes{%- endif -%}</p>',
-    expected: '<p>yes</p>'
-  }, {
-    text: '<p>{%- if false -%}no{%- endif -%}</p>',
-    expected: '<p></p>'
-  }, {
-    text: '<p> {%- if true %} yes {% endif -%} </p>',
-    expected: '<p> yes </p>'
-  }, {
-    text: '<p> {%- if false %} no {% endif -%} </p>',
-    expected: '<p></p>'
-  }, {
-    text: '<p> {% if true -%} yes {%- endif %} </p>',
-    expected: '<p> yes </p>'
-  }, {
-    text: '<p> {% if false -%} no {%- endif %} </p>',
-    expected: '<p>  </p>'
-  }, {
-    text: '<p> {% if true -%} yes {% endif -%} </p>',
-    expected: '<p> yes </p>'
-  }, {
-    text: '<p> {% if false -%} no {% endif -%} </p>',
-    expected: '<p> </p>'
-  }, {
-    text: '<p> {%- if true %} yes {%- endif %} </p>',
-    expected: '<p> yes </p>'
-  }, {
-    text: '<p> {%- if false %} no {%- endif %} </p>',
-    expected: '<p> </p>'
-  }, {
+    `,
+  },
+  {
+    text: "<p>{{- 'John' -}}</p>",
+    expected: "<p>John</p>",
+  },
+  {
+    text: "<p>{%- if true -%}yes{%- endif -%}</p>",
+    expected: "<p>yes</p>",
+  },
+  {
+    text: "<p>{%- if false -%}no{%- endif -%}</p>",
+    expected: "<p></p>",
+  },
+  {
+    text: "<p> {%- if true %} yes {% endif -%} </p>",
+    expected: "<p> yes </p>",
+  },
+  {
+    text: "<p> {%- if false %} no {% endif -%} </p>",
+    expected: "<p></p>",
+  },
+  {
+    text: "<p> {% if true -%} yes {%- endif %} </p>",
+    expected: "<p> yes </p>",
+  },
+  {
+    text: "<p> {% if false -%} no {%- endif %} </p>",
+    expected: "<p>  </p>",
+  },
+  {
+    text: "<p> {% if true -%} yes {% endif -%} </p>",
+    expected: "<p> yes </p>",
+  },
+  {
+    text: "<p> {% if false -%} no {% endif -%} </p>",
+    expected: "<p> </p>",
+  },
+  {
+    text: "<p> {%- if true %} yes {%- endif %} </p>",
+    expected: "<p> yes </p>",
+  },
+  {
+    text: "<p> {%- if false %} no {%- endif %} </p>",
+    expected: "<p> </p>",
+  },
+  {
     text: `
       <div>
         <p>
@@ -136,8 +152,9 @@ const cases = [
         <p>John
         </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -153,8 +170,9 @@ const cases = [
           yes
         </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -169,8 +187,9 @@ const cases = [
         <p>
         </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -183,8 +202,9 @@ const cases = [
         <p>
           John</p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -200,8 +220,9 @@ const cases = [
           yes
           </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -216,8 +237,9 @@ const cases = [
         <p>
           </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -233,8 +255,9 @@ const cases = [
           yes
           </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -248,8 +271,9 @@ const cases = [
       <div>
         <p></p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -265,8 +289,9 @@ const cases = [
           yes
         </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -282,8 +307,9 @@ const cases = [
           
         </p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -295,8 +321,9 @@ const cases = [
       <div>
         <p>John</p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -310,8 +337,9 @@ const cases = [
       <div>
         <p>yes</p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -325,8 +353,9 @@ const cases = [
       <div>
         <p></p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -339,8 +368,9 @@ const cases = [
       <div>
         <p>John,30</p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -354,8 +384,9 @@ const cases = [
       <div>
         <p>yes</p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -369,8 +400,9 @@ const cases = [
       <div>
         <p></p>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         <p>
@@ -396,8 +428,9 @@ const cases = [
         <i>John
           30</i>
       </div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         {%- if true -%}
@@ -411,8 +444,9 @@ const cases = [
     `,
     expected: `
       <div><p>John</p></div>
-    `
-  }, {
+    `,
+  },
+  {
     text: `
       <div>
         {% raw %}
@@ -434,16 +468,15 @@ const cases = [
           {%- endif -%}
         
       </div>
-    `
-  }
-]
+    `,
+  },
+];
 
-describe('Whitespace Control', function () {
-  cases.forEach(item => it(
-    item.text,
-    async () => {
-      const html = await liquid.parseAndRender(item.text)
-      expect(html).toBe(item.expected)
-    }
-  ))
-})
+describe("Whitespace Control", function () {
+  cases.forEach((item) =>
+    it(item.text, async () => {
+      const html = await liquid.parseAndRender(item.text);
+      expect(html).toBe(item.expected);
+    }),
+  );
+});

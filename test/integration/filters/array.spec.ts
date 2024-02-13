@@ -1,408 +1,396 @@
-import { test, render } from '../../stub/render'
-import { Liquid } from '../../../src/liquid'
+import { test, render } from "../../stub/render";
+import { Liquid } from "../../../src/liquid";
 
-describe('filters/array', function () {
-  const engine = new Liquid()
-  describe('index', function () {
-    it('should support index', function () {
-      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' +
-        '{{ beatles[1] }}'
-      return test(src, 'Paul')
-    })
-  })
-  describe('join', function () {
-    it('should support join', function () {
-      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' +
-        '{{ beatles | join: " and " }}'
-      return test(src, 'John and Paul and George and Ringo')
-    })
-    it('should default separator to space', function () {
-      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' +
-        '{{ beatles | join }}'
-      return test(src, 'John Paul George Ringo')
-    })
-    it('should throw when comma missing', async () => {
-      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' +
-        '{{ beatles | join " and " }}'
-      return expect(render(src)).rejects.toThrow('expected ":" after filter name, line:1, col:83')
-    })
-  })
-  describe('last', () => {
-    it('should support last', function () {
-      const src = '{{ arr | last }}'
-      const scope = { arr: ['zebra', 'octopus', 'giraffe', 'tiger'] }
-      return test(src, scope, 'tiger')
-    })
-  })
-  describe('split', () => {
-    it('should support split', function () {
-      const src = '{% assign my_array = "zebra, octopus, giraffe, tiger" | split: ", " %}' +
-        '{{ my_array|last }}'
-      return test(src, 'tiger')
-    })
-    it('should remove trailing empty strings', async () => {
-      const src = '{{ "zebra,octopus,,,," | split: "," | join: ", " }}'
-      return test(src, {}, 'zebra, octopus')
-    })
-    it('should return empty array for nil value', async () => {
-      await test('{{ notDefined | split: "," | size }}', {}, '0')
-      await test('{{ nil | split: "," | size }}', {}, '0')
-    })
-  })
-  describe('map', () => {
-    it('should support map', function () {
-      const posts = [{ category: 'foo' }, { category: 'bar' }]
-      return test('{{posts | map: "category"}}', { posts }, 'foobar')
-    })
-    it('should normalize non-array input', function () {
-      const post = { category: 'foo' }
-      return test('{{post | map: "category"}}', { post }, 'foo')
-    })
-    it('should allow nil results in strictVariables mode', function () {
-      const engine = new Liquid({ strictVariables: true })
+describe("filters/array", function () {
+  const engine = new Liquid();
+  describe("index", function () {
+    it("should support index", function () {
+      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' + "{{ beatles[1] }}";
+      return test(src, "Paul");
+    });
+  });
+  describe("join", function () {
+    it("should support join", function () {
+      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' + '{{ beatles | join: " and " }}';
+      return test(src, "John and Paul and George and Ringo");
+    });
+    it("should default separator to space", function () {
+      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' + "{{ beatles | join }}";
+      return test(src, "John Paul George Ringo");
+    });
+    it("should throw when comma missing", async () => {
+      const src = '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}' + '{{ beatles | join " and " }}';
+      return expect(render(src)).rejects.toThrow('expected ":" after filter name, line:1, col:83');
+    });
+  });
+  describe("last", () => {
+    it("should support last", function () {
+      const src = "{{ arr | last }}";
+      const scope = { arr: ["zebra", "octopus", "giraffe", "tiger"] };
+      return test(src, scope, "tiger");
+    });
+  });
+  describe("split", () => {
+    it("should support split", function () {
+      const src = '{% assign my_array = "zebra, octopus, giraffe, tiger" | split: ", " %}' + "{{ my_array|last }}";
+      return test(src, "tiger");
+    });
+    it("should remove trailing empty strings", async () => {
+      const src = '{{ "zebra,octopus,,,," | split: "," | join: ", " }}';
+      return test(src, {}, "zebra, octopus");
+    });
+    it("should return empty array for nil value", async () => {
+      await test('{{ notDefined | split: "," | size }}', {}, "0");
+      await test('{{ nil | split: "," | size }}', {}, "0");
+    });
+  });
+  describe("map", () => {
+    it("should support map", function () {
+      const posts = [{ category: "foo" }, { category: "bar" }];
+      return test('{{posts | map: "category"}}', { posts }, "foobar");
+    });
+    it("should normalize non-array input", function () {
+      const post = { category: "foo" };
+      return test('{{post | map: "category"}}', { post }, "foo");
+    });
+    it("should allow nil results in strictVariables mode", function () {
+      const engine = new Liquid({ strictVariables: true });
       const ctx = {
-        posts: [{ category: 'foo' }, { title: 'bar' }]
-      }
-      const result = engine.parseAndRenderSync('{{posts | map: "category" | json}}', ctx)
-      expect(result).toEqual('["foo",null]')
-    })
-    it('should support nested property', function () {
-      const tpl = '{{ arr | map: "name.first" | join }}'
-      const a = { name: { first: 'Alice' } }
-      const b = { name: { first: 'Bob' } }
-      const c = { name: { first: 'Carol' } }
-      return test(tpl, { arr: [a, b, c] }, 'Alice Bob Carol')
-    })
-  })
-  describe('sum', () => {
-    it('should support sum with no args', function () {
-      const ages = [21, null, -4, '4.5', 13.25, undefined, 0]
-      return test('{{ages | sum}}', { ages }, '34.75')
-    })
-    it('should support sum with property', function () {
-      const ages = [21, null, -4, '4.5', 13.25, undefined, 0].map(x => ({ age: x }))
-      return test('{{ages | sum: "age"}}', { ages }, '34.75')
-    })
-    it('should support sum with nested property', function () {
-      const ages = [21, null, -4, '4.5', 13.25, undefined, 0].map(x => ({ age: { first: x } }))
-      return test('{{ages | sum: "age.first"}}', { ages }, '34.75')
-    })
-    it('should support non-array input', function () {
-      const age = 21.5
-      return test('{{age | sum}}', { age }, '21.5')
-    })
-    it('should coerce missing property to zero', function () {
-      const ages = [{ qty: 1 }, { qty: 2, cnt: 3 }, { cnt: 4 }]
-      return test('{{ages | sum}} {{ages | sum: "cnt"}} {{ages | sum: "other"}}', { ages }, '0 7 0')
-    })
-    it('should coerce indexable non-map values to zero', function () {
-      const input = [1, 'foo', { quantity: 3 }]
-      return test('{{input | sum}}', { input }, '1')
-    })
-    it('should coerce unindexable values to zero', function () {
-      const input = [1, null, { quantity: 2 }]
-      return test('{{input | sum}}', { input }, '1')
-    })
-    it('should coerce true to 1', function () {
-      const input = [1, true, null, { quantity: 2 }]
-      return test('{{input | sum}}', { input }, '2')
-    })
-    it('should not support nested arrays', function () {
-      const ages = [1, [2, [3, 4]]]
-      return test('{{ages | sum}}', { ages }, '1')
-    })
-  })
-  describe('compact', () => {
-    it('should compact array', function () {
-      const posts = [{ category: 'foo' }, { category: 'bar' }, { foo: 'bar' }]
-      return test('{{posts | map: "category" | compact}}', { posts }, 'foobar')
-    })
-  })
+        posts: [{ category: "foo" }, { title: "bar" }],
+      };
+      const result = engine.parseAndRenderSync('{{posts | map: "category" | json}}', ctx);
+      expect(result).toEqual('["foo",null]');
+    });
+    it("should support nested property", function () {
+      const tpl = '{{ arr | map: "name.first" | join }}';
+      const a = { name: { first: "Alice" } };
+      const b = { name: { first: "Bob" } };
+      const c = { name: { first: "Carol" } };
+      return test(tpl, { arr: [a, b, c] }, "Alice Bob Carol");
+    });
+  });
+  describe("sum", () => {
+    it("should support sum with no args", function () {
+      const ages = [21, null, -4, "4.5", 13.25, undefined, 0];
+      return test("{{ages | sum}}", { ages }, "34.75");
+    });
+    it("should support sum with property", function () {
+      const ages = [21, null, -4, "4.5", 13.25, undefined, 0].map((x) => ({ age: x }));
+      return test('{{ages | sum: "age"}}', { ages }, "34.75");
+    });
+    it("should support sum with nested property", function () {
+      const ages = [21, null, -4, "4.5", 13.25, undefined, 0].map((x) => ({ age: { first: x } }));
+      return test('{{ages | sum: "age.first"}}', { ages }, "34.75");
+    });
+    it("should support non-array input", function () {
+      const age = 21.5;
+      return test("{{age | sum}}", { age }, "21.5");
+    });
+    it("should coerce missing property to zero", function () {
+      const ages = [{ qty: 1 }, { qty: 2, cnt: 3 }, { cnt: 4 }];
+      return test('{{ages | sum}} {{ages | sum: "cnt"}} {{ages | sum: "other"}}', { ages }, "0 7 0");
+    });
+    it("should coerce indexable non-map values to zero", function () {
+      const input = [1, "foo", { quantity: 3 }];
+      return test("{{input | sum}}", { input }, "1");
+    });
+    it("should coerce unindexable values to zero", function () {
+      const input = [1, null, { quantity: 2 }];
+      return test("{{input | sum}}", { input }, "1");
+    });
+    it("should coerce true to 1", function () {
+      const input = [1, true, null, { quantity: 2 }];
+      return test("{{input | sum}}", { input }, "2");
+    });
+    it("should not support nested arrays", function () {
+      const ages = [1, [2, [3, 4]]];
+      return test("{{ages | sum}}", { ages }, "1");
+    });
+  });
+  describe("compact", () => {
+    it("should compact array", function () {
+      const posts = [{ category: "foo" }, { category: "bar" }, { foo: "bar" }];
+      return test('{{posts | map: "category" | compact}}', { posts }, "foobar");
+    });
+  });
 
-  describe('concat', () => {
-    it('should concat args value', async () => {
-      const scope = { val: ['hey'], arr: ['foo', 'bar'] }
-      await test('{{ val | concat: arr | join: "," }}', scope, 'hey,foo,bar')
-    })
-    it('should support undefined left value', async () => {
-      const scope = { arr: ['foo', 'bar'] }
-      await test('{{ notDefined | concat: arr | join: "," }}', scope, 'foo,bar')
-    })
-    it('should ignore nil left value', async () => {
-      const scope = { undefinedValue: undefined, nullValue: null, arr: ['foo', 'bar'] }
-      await test('{{ undefinedValue | concat: arr | join: "," }}', scope, 'foo,bar')
-      await test('{{ nullValue | concat: arr | join: "," }}', scope, 'foo,bar')
-    })
-    it('should ignore nil right value', async () => {
-      const scope = { nullValue: null }
-      await test('{{ nullValue | concat | join: "," }}', scope, '')
-      await test('{{ nullValue | concat: nil | join: "," }}', scope, '')
-    })
-  })
+  describe("concat", () => {
+    it("should concat args value", async () => {
+      const scope = { val: ["hey"], arr: ["foo", "bar"] };
+      await test('{{ val | concat: arr | join: "," }}', scope, "hey,foo,bar");
+    });
+    it("should support undefined left value", async () => {
+      const scope = { arr: ["foo", "bar"] };
+      await test('{{ notDefined | concat: arr | join: "," }}', scope, "foo,bar");
+    });
+    it("should ignore nil left value", async () => {
+      const scope = { undefinedValue: undefined, nullValue: null, arr: ["foo", "bar"] };
+      await test('{{ undefinedValue | concat: arr | join: "," }}', scope, "foo,bar");
+      await test('{{ nullValue | concat: arr | join: "," }}', scope, "foo,bar");
+    });
+    it("should ignore nil right value", async () => {
+      const scope = { nullValue: null };
+      await test('{{ nullValue | concat | join: "," }}', scope, "");
+      await test('{{ nullValue | concat: nil | join: "," }}', scope, "");
+    });
+  });
 
-  describe('push', () => {
-    it('should push arg value', async () => {
-      const scope = { val: ['hey'], arg: 'foo' }
-      await test('{{ val | push: arg | join: "," }}', scope, 'hey,foo')
-    })
-    it('should not change original array', async () => {
-      const scope = { val: ['hey'], arg: 'foo' }
-      await test('{{ val | push: arg | join: "," }} {{ val | push: arg | join: "," }}', scope, 'hey,foo hey,foo')
-    })
-    it('should support undefined left value', async () => {
-      const scope = { arg: 'foo' }
-      await test('{{ notDefined | push: arg | join: "," }}', scope, 'foo')
-    })
-    it('should ignore nil left value', async () => {
-      const scope = { undefinedValue: undefined, nullValue: null, arg: 'foo' }
-      await test('{{ undefinedValue | push: arg | join: "," }}', scope, 'foo')
-      await test('{{ nullValue | push: arg | join: "," }}', scope, 'foo')
-    })
-    it('should ignore nil right value', async () => {
-      const scope = { nullValue: null }
-      await test('{{ nullValue | push | join: "," }}', scope, '')
-      await test('{{ nullValue | push: nil | join: "," }}', scope, '')
-    })
-  })
+  describe("push", () => {
+    it("should push arg value", async () => {
+      const scope = { val: ["hey"], arg: "foo" };
+      await test('{{ val | push: arg | join: "," }}', scope, "hey,foo");
+    });
+    it("should not change original array", async () => {
+      const scope = { val: ["hey"], arg: "foo" };
+      await test('{{ val | push: arg | join: "," }} {{ val | push: arg | join: "," }}', scope, "hey,foo hey,foo");
+    });
+    it("should support undefined left value", async () => {
+      const scope = { arg: "foo" };
+      await test('{{ notDefined | push: arg | join: "," }}', scope, "foo");
+    });
+    it("should ignore nil left value", async () => {
+      const scope = { undefinedValue: undefined, nullValue: null, arg: "foo" };
+      await test('{{ undefinedValue | push: arg | join: "," }}', scope, "foo");
+      await test('{{ nullValue | push: arg | join: "," }}', scope, "foo");
+    });
+    it("should ignore nil right value", async () => {
+      const scope = { nullValue: null };
+      await test('{{ nullValue | push | join: "," }}', scope, "");
+      await test('{{ nullValue | push: nil | join: "," }}', scope, "");
+    });
+  });
 
-  describe('reverse', function () {
-    it('should support reverse', () => test(
-      '{{ "Ground control to Major Tom." | split: "" | reverse | join: "" }}',
-      '.moT rojaM ot lortnoc dnuorG'
-    ))
-    it('should be pure', async () => {
-      const scope = { arr: ['a', 'b', 'c'] }
-      await render('{{ arr | reverse | join: "" }}', scope)
-      const html = await render('{{ arr | join: "" }}', scope)
-      expect(html).toBe('abc')
-    })
-  })
-  describe('sample', function () {
-    it('should return one item if count not specified', async () => {
-      const template = '{{ "hello,world" | split: "," | sample }}'
-      const result = await engine.parseAndRender(template)
-      expect(result).toMatch(/hello|world/)
-    })
-    it('should return full array sample even if excess count', () => test(
-      '{{ "hello,world" | split: "," | sample: 10 | size }}',
-      '2'
-    ))
-    it('should return partial array sample', () => test(
-      '{{ "hello,world" | split: "," | sample: 1 | size }}',
-      '5'
-    ))
-    it('should sample nil value', () => test(
-      '{{ nil | sample: 2 }}',
-      ''
-    ))
-    it('should sample string characters', () => test(
-      '{{ "aaa" | sample: 2 }}',
-      'aa'
-    ))
-  })
-  describe('size', function () {
-    it('should return string length', () => test(
-      '{{ "Ground control to Major Tom." | size }}',
-      '28'
-    ))
-    it('should return array size', () => test(
-      '{% assign my_array = "apples, oranges, peaches, plums" | split: ", " %}{{ my_array | size }}',
-      '4'
-    ))
-    it('should be respected with <string>.size notation', () => test(
-      '{% assign my_string = "Ground control to Major Tom." %}{{ my_string.size }}',
-      '28'
-    ))
-    it('should be respected with <array>.size notation', () => test(
-      '{% assign my_array = "apples, oranges, peaches, plums" | split: ", " %}{{ my_array.size }}',
-      '4'
-    ))
-    it('should return 0 for false', () => test('{{ false | size }}', '0'))
-    it('should return 0 for nil', () => test('{{ nil | size }}', '0'))
-    it('should return 0 for undefined', () => test('{{ foo | size }}', '0'))
-  })
-  describe('first', function () {
-    it('should support first', () => test(
-      '{{arr | first}}',
-      { arr: [ 'zebra', 'tiger' ] },
-      'zebra'
-    ))
-    it('should return empty for nil', () => test('{{nil | first}}', ''))
-    it('should return empty for undefined', () => test('{{foo | first}}', ''))
-    it('should return empty for false', () => test('{{false | first}}', ''))
-    it('should return empty for string', () => test('{{"zebra" | first}}', ''))
-  })
-  describe('last', function () {
-    it('should support last', () => test(
-      '{{arr | last}}',
-      { arr: [ 'zebra', 'tiger' ] },
-      'tiger'
-    ))
-    it('should return empty for nil', () => test('{{nil | last}}', ''))
-    it('should return empty for undefined', () => test('{{foo | last}}', ''))
-    it('should return empty for false', () => test('{{false | last}}', ''))
-    it('should return empty for string', () => test('{{"zebra" | last}}', ''))
-  })
-  describe('slice', function () {
-    it('should slice first char by 0', () => test('{{ "Liquid" | slice: 0 }}', 'L'))
-    it('should slice third char by 2', () => test('{{ "Liquid" | slice: 2 }}', 'q'))
-    it('should slice substr by 2,5', () => test('{{ "Liquid" | slice: 2, 5 }}', 'quid'))
-    it('should slice substr by -3,2', () => test('{{ "Liquid" | slice: -3, 2 }}', 'ui'))
-    it('should slice substr by -2,2', () => test('{{ "abc" | slice: -2, 2 }}', 'bc'))
-    it('should support array', () => test('{{ "1,2,3,4" | split: "," | slice: 1,2 | join }}', '2 3'))
-    it('should return empty array for nil value', () => test('{{ nil | slice: 0 }}', ''))
-  })
-  describe('sort', function () {
-    it('should support sort', function () {
-      return test('{% assign my_array = "zebra, octopus, giraffe, Sally Snake"' +
-              ' | split: ", " %}' +
-              '{{ my_array | sort | join: ", " }}',
-      'Sally Snake, giraffe, octopus, zebra')
-    })
-    it('should support sort by key', function () {
-      const tpl = '{{ arr | sort: "name" | map: "name" | join }}'
-      const arr = [{ name: 'Bob' }, { name: 'Carol' }, { name: 'Alice' }]
-      return test(tpl, { arr }, 'Alice Bob Carol')
-    })
-    it('should support sort by nested property', function () {
-      const tpl = '{{ arr | sort: "name.first" | map: "name.first" | join }}'
-      const a = { name: { first: 'Alice' } }
-      const b = { name: { first: 'Bob' } }
-      const c = { name: { first: 'Carol' } }
-      return test(tpl, { arr: [b, c, a, c] }, 'Alice Bob Carol Carol')
-    })
-    it('should not change the original array', () => {
-      const arr = ['one', 'two', 'three', 'four', 'five']
-      return test('{{arr | sort}} {{arr}}', { arr }, 'fivefouronethreetwo onetwothreefourfive')
-    })
-    it('should return empty array for nil value', () => {
-      return test('{{notDefined | sort | size}}', {}, '0')
-    })
-  })
-  describe('sort_natural', function () {
-    it('should sort alphabetically', () => {
+  describe("reverse", function () {
+    it("should support reverse", () =>
+      test('{{ "Ground control to Major Tom." | split: "" | reverse | join: "" }}', ".moT rojaM ot lortnoc dnuorG"));
+    it("should be pure", async () => {
+      const scope = { arr: ["a", "b", "c"] };
+      await render('{{ arr | reverse | join: "" }}', scope);
+      const html = await render('{{ arr | join: "" }}', scope);
+      expect(html).toBe("abc");
+    });
+  });
+  describe("sample", function () {
+    it("should return one item if count not specified", async () => {
+      const template = '{{ "hello,world" | split: "," | sample }}';
+      const result = await engine.parseAndRender(template);
+      expect(result).toMatch(/hello|world/);
+    });
+    it("should return full array sample even if excess count", () =>
+      test('{{ "hello,world" | split: "," | sample: 10 | size }}', "2"));
+    it("should return partial array sample", () => test('{{ "hello,world" | split: "," | sample: 1 | size }}', "5"));
+    it("should sample nil value", () => test("{{ nil | sample: 2 }}", ""));
+    it("should sample string characters", () => test('{{ "aaa" | sample: 2 }}', "aa"));
+  });
+  describe("size", function () {
+    it("should return string length", () => test('{{ "Ground control to Major Tom." | size }}', "28"));
+    it("should return array size", () =>
+      test('{% assign my_array = "apples, oranges, peaches, plums" | split: ", " %}{{ my_array | size }}', "4"));
+    it("should be respected with <string>.size notation", () =>
+      test('{% assign my_string = "Ground control to Major Tom." %}{{ my_string.size }}', "28"));
+    it("should be respected with <array>.size notation", () =>
+      test('{% assign my_array = "apples, oranges, peaches, plums" | split: ", " %}{{ my_array.size }}', "4"));
+    it("should return 0 for false", () => test("{{ false | size }}", "0"));
+    it("should return 0 for nil", () => test("{{ nil | size }}", "0"));
+    it("should return 0 for undefined", () => test("{{ foo | size }}", "0"));
+  });
+  describe("first", function () {
+    it("should support first", () => test("{{arr | first}}", { arr: ["zebra", "tiger"] }, "zebra"));
+    it("should return empty for nil", () => test("{{nil | first}}", ""));
+    it("should return empty for undefined", () => test("{{foo | first}}", ""));
+    it("should return empty for false", () => test("{{false | first}}", ""));
+    it("should return empty for string", () => test('{{"zebra" | first}}', ""));
+  });
+  describe("last", function () {
+    it("should support last", () => test("{{arr | last}}", { arr: ["zebra", "tiger"] }, "tiger"));
+    it("should return empty for nil", () => test("{{nil | last}}", ""));
+    it("should return empty for undefined", () => test("{{foo | last}}", ""));
+    it("should return empty for false", () => test("{{false | last}}", ""));
+    it("should return empty for string", () => test('{{"zebra" | last}}', ""));
+  });
+  describe("slice", function () {
+    it("should slice first char by 0", () => test('{{ "Liquid" | slice: 0 }}', "L"));
+    it("should slice third char by 2", () => test('{{ "Liquid" | slice: 2 }}', "q"));
+    it("should slice substr by 2,5", () => test('{{ "Liquid" | slice: 2, 5 }}', "quid"));
+    it("should slice substr by -3,2", () => test('{{ "Liquid" | slice: -3, 2 }}', "ui"));
+    it("should slice substr by -2,2", () => test('{{ "abc" | slice: -2, 2 }}', "bc"));
+    it("should support array", () => test('{{ "1,2,3,4" | split: "," | slice: 1,2 | join }}', "2 3"));
+    it("should return empty array for nil value", () => test("{{ nil | slice: 0 }}", ""));
+  });
+  describe("sort", function () {
+    it("should support sort", function () {
+      return test(
+        '{% assign my_array = "zebra, octopus, giraffe, Sally Snake"' +
+          ' | split: ", " %}' +
+          '{{ my_array | sort | join: ", " }}',
+        "Sally Snake, giraffe, octopus, zebra",
+      );
+    });
+    it("should support sort by key", function () {
+      const tpl = '{{ arr | sort: "name" | map: "name" | join }}';
+      const arr = [{ name: "Bob" }, { name: "Carol" }, { name: "Alice" }];
+      return test(tpl, { arr }, "Alice Bob Carol");
+    });
+    it("should support sort by nested property", function () {
+      const tpl = '{{ arr | sort: "name.first" | map: "name.first" | join }}';
+      const a = { name: { first: "Alice" } };
+      const b = { name: { first: "Bob" } };
+      const c = { name: { first: "Carol" } };
+      return test(tpl, { arr: [b, c, a, c] }, "Alice Bob Carol Carol");
+    });
+    it("should not change the original array", () => {
+      const arr = ["one", "two", "three", "four", "five"];
+      return test("{{arr | sort}} {{arr}}", { arr }, "fivefouronethreetwo onetwothreefourfive");
+    });
+    it("should return empty array for nil value", () => {
+      return test("{{notDefined | sort | size}}", {}, "0");
+    });
+  });
+  describe("sort_natural", function () {
+    it("should sort alphabetically", () => {
       return test(
         '{% assign my_array = "zebra, octopus, giraffe, Sally Snake" | split: ", " %}{{ my_array | sort_natural | join: ", " }}',
-        'giraffe, octopus, Sally Snake, zebra'
-      )
-    })
-    it('should sort with specified property', () => test(
-      '{{ students | sort_natural: "name" | map: "name" | join }}',
-      { students: [{ name: 'bob' }, { name: 'alice' }, { name: 'carol' }] },
-      'alice bob carol'
-    ))
-    it('should be stable', () => test(
-      '{{ students | sort_natural: "age" | map: "name" | join }}',
-      { students: [{ name: 'bob', age: 1 }, { name: 'alice', age: 1 }, { name: 'carol', age: 1 }] },
-      'bob alice carol'
-    ))
-    it('should be stable when it comes to undefined props', () => test(
-      '{{ students | sort_natural: "age" | map: "name" | join }}',
-      { students: [{ name: 'bob' }, { name: 'alice', age: 2 }, { name: 'amber' }, { name: 'watson' }, { name: 'michael' }, { name: 'charlie' }] },
-      'alice bob amber watson michael charlie'
-    ))
-    it('should tolerate undefined props', () => test(
-      '{{ students | sort_natural: "age" | map: "name" | join }}',
-      { students: [{ name: 'bob' }, { name: 'alice', age: 2 }, { name: 'carol' }] },
-      'alice bob carol'
-    ))
-    it('should tolerate non array', async () => {
-      await test(
+        "giraffe, octopus, Sally Snake, zebra",
+      );
+    });
+    it("should sort with specified property", () =>
+      test(
+        '{{ students | sort_natural: "name" | map: "name" | join }}',
+        { students: [{ name: "bob" }, { name: "alice" }, { name: "carol" }] },
+        "alice bob carol",
+      ));
+    it("should be stable", () =>
+      test(
         '{{ students | sort_natural: "age" | map: "name" | join }}',
-        { students: {} },
-        ''
-      )
-      await test(
-        '{{ students | sort_natural: "age" | map: "name" | size }}',
-        { students: {} },
-        '1'
-      )
-    })
-    it('should return empty array for nil value', () => test(
-      '{{ students | sort_natural: "age" | map: "name" | size }}',
-      { students: undefined },
-      '0'
-    ))
-  })
-  describe('uniq', function () {
-    it('should uniq string list', function () {
+        {
+          students: [
+            { name: "bob", age: 1 },
+            { name: "alice", age: 1 },
+            { name: "carol", age: 1 },
+          ],
+        },
+        "bob alice carol",
+      ));
+    it("should be stable when it comes to undefined props", () =>
+      test(
+        '{{ students | sort_natural: "age" | map: "name" | join }}',
+        {
+          students: [
+            { name: "bob" },
+            { name: "alice", age: 2 },
+            { name: "amber" },
+            { name: "watson" },
+            { name: "michael" },
+            { name: "charlie" },
+          ],
+        },
+        "alice bob amber watson michael charlie",
+      ));
+    it("should tolerate undefined props", () =>
+      test(
+        '{{ students | sort_natural: "age" | map: "name" | join }}',
+        { students: [{ name: "bob" }, { name: "alice", age: 2 }, { name: "carol" }] },
+        "alice bob carol",
+      ));
+    it("should tolerate non array", async () => {
+      await test('{{ students | sort_natural: "age" | map: "name" | join }}', { students: {} }, "");
+      await test('{{ students | sort_natural: "age" | map: "name" | size }}', { students: {} }, "1");
+    });
+    it("should return empty array for nil value", () =>
+      test('{{ students | sort_natural: "age" | map: "name" | size }}', { students: undefined }, "0"));
+  });
+  describe("uniq", function () {
+    it("should uniq string list", function () {
       return test(
-        '{% assign my_array = "ants, bugs, bees, bugs, ants" | split: ", " %}' +
-        '{{ my_array | uniq | join: ", " }}',
-        'ants, bugs, bees'
-      )
-    })
-    it('should uniq falsy value', function () {
-      return test('{{"" | uniq | join: ","}}', '')
-    })
-  })
-  describe('where', function () {
+        '{% assign my_array = "ants, bugs, bees, bugs, ants" | split: ", " %}' + '{{ my_array | uniq | join: ", " }}',
+        "ants, bugs, bees",
+      );
+    });
+    it("should uniq falsy value", function () {
+      return test('{{"" | uniq | join: ","}}', "");
+    });
+  });
+  describe("where", function () {
     const products = [
-      { title: 'Vacuum', type: 'living room' },
-      { title: 'Spatula', type: 'kitchen' },
-      { title: 'Television', type: 'living room' },
-      { title: 'Garlic press', type: 'kitchen' },
-      { title: 'Coffee mug', available: true },
-      { title: 'Limited edition sneakers', available: false },
-      { title: 'Boring sneakers', available: true }
-    ]
-    it('should support filter by property value', function () {
-      return test(`{% assign kitchen_products = products | where: "type", "kitchen" %}
+      { title: "Vacuum", type: "living room" },
+      { title: "Spatula", type: "kitchen" },
+      { title: "Television", type: "living room" },
+      { title: "Garlic press", type: "kitchen" },
+      { title: "Coffee mug", available: true },
+      { title: "Limited edition sneakers", available: false },
+      { title: "Boring sneakers", available: true },
+    ];
+    it("should support filter by property value", function () {
+      return test(
+        `{% assign kitchen_products = products | where: "type", "kitchen" %}
         Kitchen products:
         {% for product in kitchen_products -%}
         - {{ product.title }}
-        {% endfor %}`, { products }, `
+        {% endfor %}`,
+        { products },
+        `
         Kitchen products:
         - Spatula
         - Garlic press
-        `)
-    })
-    it('should support filter truthy property', function () {
-      return test(`{% assign available_products = products | where: "available" %}
+        `,
+      );
+    });
+    it("should support filter truthy property", function () {
+      return test(
+        `{% assign available_products = products | where: "available" %}
         Available products:
         {% for product in available_products -%}
         - {{ product.title }}
-        {% endfor %}`, { products }, `
+        {% endfor %}`,
+        { products },
+        `
         Available products:
         - Coffee mug
         - Boring sneakers
-        `)
-    })
-    it('should support filter by null property', function () {
-      return test(`{% assign untyped_products = products | where: "type", null %}
+        `,
+      );
+    });
+    it("should support filter by null property", function () {
+      return test(
+        `{% assign untyped_products = products | where: "type", null %}
         Untyped products:
         {% for product in untyped_products -%}
         - {{ product.title }}
-        {% endfor %}`, { products }, `
+        {% endfor %}`,
+        { products },
+        `
         Untyped products:
         - Coffee mug
         - Limited edition sneakers
         - Boring sneakers
-        `)
-    })
-    it('should support nested property', async function () {
+        `,
+      );
+    });
+    it("should support nested property", async function () {
       const authors = [
-        { name: 'Alice', books: { year: 2019 } },
-        { name: 'Bob', books: { year: 2018 } }
-      ]
+        { name: "Alice", books: { year: 2019 } },
+        { name: "Bob", books: { year: 2018 } },
+      ];
       return test(
         `{% assign recentAuthors = authors | where: 'books.year', 2019 %}
         Recent Authors:
         {%- for author in recentAuthors %}
           - {{author.name}}
         {%- endfor %}`,
-        { authors }, `
+        { authors },
+        `
         Recent Authors:
-          - Alice`)
-    })
-    it('should apply to string', async () => {
-      await test('{{"abc" | where: 1, "b" }}', 'abc')
-      await test('{{"abc" | where: 1, "a" }}', '')
-    })
-    it('should normalize non-array input', async () => {
-      const scope = { obj: { foo: 'FOO' } }
-      await test('{{obj | where: "foo", "FOO" }}', scope, '[object Object]')
-      await test('{{obj | where: "foo", "BAR" }}', scope, '')
-    })
-  })
-})
+          - Alice`,
+      );
+    });
+    it("should apply to string", async () => {
+      await test('{{"abc" | where: 1, "b" }}', "abc");
+      await test('{{"abc" | where: 1, "a" }}', "");
+    });
+    it("should normalize non-array input", async () => {
+      const scope = { obj: { foo: "FOO" } };
+      await test('{{obj | where: "foo", "FOO" }}', scope, "[object Object]");
+      await test('{{obj | where: "foo", "BAR" }}', scope, "");
+    });
+  });
+});

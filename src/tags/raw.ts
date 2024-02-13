@@ -1,18 +1,19 @@
-import { Liquid, TagToken, TopLevelToken, Tag } from '..'
-import { isTagToken } from '../util'
+import type { Liquid, TagToken, TopLevelToken } from "..";
+import { Tag } from "..";
+import { isTagToken } from "../util/type-guards";
 
 export default class extends Tag {
-  private tokens: TopLevelToken[] = []
-  constructor (tagToken: TagToken, remainTokens: TopLevelToken[], liquid: Liquid) {
-    super(tagToken, remainTokens, liquid)
+  private tokens: TopLevelToken[] = [];
+  constructor(tagToken: TagToken, remainTokens: TopLevelToken[], liquid: Liquid) {
+    super(tagToken, remainTokens, liquid);
     while (remainTokens.length) {
-      const token = remainTokens.shift()!
-      if (isTagToken(token) && token.name === 'endraw') return
-      this.tokens.push(token)
+      const token = remainTokens.shift()!;
+      if (isTagToken(token) && token.name === "endraw") return;
+      this.tokens.push(token);
     }
-    throw new Error(`tag ${tagToken.getText()} not closed`)
+    throw new Error(`tag ${tagToken.getText()} not closed`);
   }
-  render () {
-    return this.tokens.map((token: TopLevelToken) => token.getText()).join('')
+  render() {
+    return this.tokens.map((token: TopLevelToken) => token.getText()).join("");
   }
 }
