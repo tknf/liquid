@@ -8,6 +8,7 @@ import { LiquidError, ParseError } from "../util/error";
 import type { Liquid } from "../liquid";
 import { isOutputToken, isTagToken } from "../util/type-guards";
 import { toPromise } from "../util/async";
+import { assert } from "../util/assert";
 import { ParseStream } from "./parse-stream";
 import { Tokenizer } from "./tokenizer";
 

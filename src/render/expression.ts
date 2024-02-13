@@ -5,6 +5,7 @@ import type { UnaryOperatorHandler } from "../render";
 import { isOperatorToken, isPropertyAccessToken, isRangeToken } from "../util/type-guards";
 import { UndefinedVariableError } from "../util/error";
 import { range } from "../util/underscore";
+import { assert } from "../util/assert";
 
 export class Expression {
   private postfix: Token[];

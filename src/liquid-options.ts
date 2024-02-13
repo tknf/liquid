@@ -7,6 +7,7 @@ import { json } from "./filters/misc";
 import { escape } from "./filters/html";
 import * as fs from "./fs/fs-impl";
 import { isArray, isFunction, isString } from "./util/underscore";
+import { assert } from "./util/assert";
 
 type OutputEscape = (value: any) => string;
 type OutputEscapeOption = "escape" | "json" | OutputEscape;
