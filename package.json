@@ -50,6 +50,10 @@
     "esm",
     "vite"
   ],
+  "publishConfig": {
+    "access": "public",
+    "@tknf-labs:registry": "https://registry.npmjs.org"
+  },
   "author": "TKNF LLC <dev@tknf.net>",
   "license": "MIT",
   "bugs": {
